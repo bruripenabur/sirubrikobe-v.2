@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import type { PayloadRubrik } from "../types/rubrik";
 import { MODUL_4_BUKU_NILAI_URL } from "../lib/supabase";
+import { SIMPATTI_MODULES, buildModuleRelayUrl } from "../lib/ssoAuth";
 
 interface Step4PreviewAndRelayProps {
   payloadRubrik: PayloadRubrik;
@@ -33,6 +34,7 @@ export function Step4PreviewAndRelay({
     type: "success" | "warning" | "error";
     message: string;
     relayUrl?: string;
+    displayUrl?: string;
   } | null>(null);
 
   const totalBobot = payloadRubrik.daftar_instrumen.reduce(
@@ -81,26 +83,31 @@ export function Step4PreviewAndRelay({
     setIsSaving(null);
 
     const targetId = res.savedRpsId || selectedRpsId || "";
-    const relayUrl = `${MODUL_4_BUKU_NILAI_URL}?rps_id=${encodeURIComponent(targetId)}`;
+    const targetBase =
+      MODUL_4_BUKU_NILAI_URL && !MODUL_4_BUKU_NILAI_URL.includes("[MASUKKAN_")
+        ? MODUL_4_BUKU_NILAI_URL
+        : SIMPATTI_MODULES.portofolio;
+    const displayUrl = `${targetBase}?rps_id=${encodeURIComponent(targetId)}`;
+    const relayUrl = await buildModuleRelayUrl(targetBase, targetId || null);
 
     if (res.ok) {
       setSaveFeedback({
         type: "success",
         message:
-          "Rubrik berhasil disimpan ke ekosistem SIMPEL-OBE! Mengarahkan ke Modul 4 (Buku Nilai & Portofolio)...",
+          "Rubrik berhasil disimpan ke ekosistem SIMPEL-OBE! Mengarahkan ke Modul 4 (portofolio.simpatti.site)...",
         relayUrl,
+        displayUrl,
       });
 
-      if (!MODUL_4_BUKU_NILAI_URL.includes("[MASUKKAN_")) {
-        setTimeout(() => {
-          window.location.href = relayUrl;
-        }, 1200);
-      }
+      setTimeout(() => {
+        window.location.href = relayUrl;
+      }, 1200);
     } else {
       setSaveFeedback({
         type: "error",
         message: res.error || "Gagal menyimpan rubrik sebelum estafet ke Modul 4.",
         relayUrl,
+        displayUrl,
       });
     }
   };
@@ -195,7 +202,7 @@ export function Step4PreviewAndRelay({
               }}
               className="px-3.5 py-2 rounded-lg bg-[#0b3d91] text-white text-xs font-semibold flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
-              <span>Buka Modul 4 ({saveFeedback.relayUrl})</span>
+              <span>Buka Modul 4 ({saveFeedback.displayUrl || saveFeedback.relayUrl})</span>
               <ExternalLink className="w-3.5 h-3.5 text-[#ffcc00]" />
             </button>
           )}

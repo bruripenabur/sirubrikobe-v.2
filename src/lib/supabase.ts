@@ -20,10 +20,10 @@ export const SUPABASE_URL =
   import.meta.env.VITE_SUPABASE_URL || "https://eysccwxpgdcoqfvaalye.supabase.co";
 
 export const SUPABASE_ANON_KEY =
-  import.meta.env.VITE_SUPABASE_ANON_KEY || "[MASUKKAN_PUBLISHABLE_KEY_SUPABASE_ANDA]";
+  import.meta.env.VITE_SUPABASE_ANON_KEY || "sb_publishable_z-P7ucdZVBwh8dH4kcU7Pg_mH6vL9P8";
 
 export const MODUL_4_BUKU_NILAI_URL =
-  import.meta.env.VITE_MODUL_4_URL || "[MASUKKAN_URL_MODUL_4_BUKU_NILAI]";
+  import.meta.env.VITE_MODUL_4_URL || "https://portofolio.simpatti.site";
 
 export function isSupabaseConfigured(): boolean {
   return (
@@ -40,7 +40,9 @@ export function getSupabaseClient(): SupabaseClient {
   if (!cachedClient) {
     cachedClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
       auth: {
-        persistSession: false,
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: false,
       },
     });
   }
@@ -48,6 +50,29 @@ export function getSupabaseClient(): SupabaseClient {
 }
 
 export const supabase = getSupabaseClient();
+
+export async function verifySupabaseConnection(): Promise<{
+  connected: boolean;
+  error: string | null;
+}> {
+  if (!isSupabaseConfigured()) {
+    return { connected: false, error: "Kunci Supabase belum dikonfigurasi" };
+  }
+  try {
+    const { error } = await supabase
+      .from("obe_rps")
+      .select("id", { count: "exact", head: true });
+    if (error) {
+      return { connected: false, error: error.message };
+    }
+    return { connected: true, error: null };
+  } catch (err) {
+    return {
+      connected: false,
+      error: err instanceof Error ? err.message : "Gagal menghubungi Supabase",
+    };
+  }
+}
 
 export const DEFAULT_SKALA_PENILAIAN: SkalaRubrikItem[] = [
   { skor: 4, label: "Sangat Baik", rentang_nilai: "85 - 100" },
