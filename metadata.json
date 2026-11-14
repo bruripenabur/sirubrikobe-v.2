@@ -1,0 +1,6 @@
+{
+  "name": "SIMPEL-OBE 03: SIRUBRIK UNPATTI",
+  "description": "Desain Instrumen Evaluasi & Matriks Rubrik Analitis Berbasis OBE Universitas Pattimura terintegrasi dengan ekosistem SIMPEL-OBE.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
